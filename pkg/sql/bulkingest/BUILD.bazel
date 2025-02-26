@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "ingest.go",
         "ingest_file_processor.go",
+        "ingest_strategy.go",
         "plan_ingest.go",
         "split.go",
         "split_picker.go",
@@ -12,6 +13,7 @@ go_library(
     importpath = "github.com/cockroachdb/cockroach/pkg/sql/bulkingest",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/base",
         "//pkg/cloud",
         "//pkg/clusterversion",
         "//pkg/kv",
@@ -31,6 +33,7 @@ go_library(
         "//pkg/util/ioctx",
         "//pkg/util/log",
         "//pkg/util/mon",
+        "//pkg/util/taskset",
         "//pkg/util/tracing",
         "@com_github_cockroachdb_errors//:errors",
     ],
@@ -40,6 +43,7 @@ go_test(
     name = "bulkingest_test",
     srcs = [
         "ingest_file_processor_test.go",
+        "ingest_strategy_test.go",
         "ingest_test.go",
         "main_test.go",
         "plan_ingest_test.go",
@@ -80,6 +84,8 @@ go_test(
         "//pkg/util/leaktest",
         "//pkg/util/log",
         "//pkg/util/randutil",
+        "//pkg/util/taskset",
         "@com_github_stretchr_testify//require",
+        "@org_golang_x_sync//errgroup",
     ],
 )
