@@ -22,7 +22,6 @@ import (
 	"github.com/cockroachdb/cockroach/pkg/security/username"
 	"github.com/cockroachdb/cockroach/pkg/settings"
 	"github.com/cockroachdb/cockroach/pkg/sql"
-	"github.com/cockroachdb/cockroach/pkg/sql/bulkingest"
 	"github.com/cockroachdb/cockroach/pkg/sql/bulkmerge"
 	"github.com/cockroachdb/cockroach/pkg/sql/bulksst"
 	"github.com/cockroachdb/cockroach/pkg/sql/catalog/descpb"
@@ -323,14 +322,14 @@ func distImport(
 		}
 
 		writeTS := &hlc.Timestamp{WallTime: walltime}
-		merged, err := bulkmerge.Merge(ctx, execCtx, inputSSTs, spans, func(instanceID base.SQLInstanceID) string {
+		_, err = bulkmerge.Merge(ctx, execCtx, inputSSTs, spans, func(instanceID base.SQLInstanceID) string {
 			return fmt.Sprintf("nodelocal://%d/job/%d/merge/", instanceID, job.ID())
-		}, 0 /* iteration */, 1 /* maxIterations */, writeTS)
+		}, 1 /* iteration */, 1 /* maxIterations */, writeTS)
 		if err != nil {
 			return err
 		}
 
-		return bulkingest.IngestFiles(ctx, execCtx, spans, merged)
+		return nil
 	})
 
 	g.GoCtx(replanChecker)
