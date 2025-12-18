@@ -32,6 +32,7 @@ import (
 	"github.com/cockroachdb/cockroach/pkg/sql/sem/tree"
 	"github.com/cockroachdb/cockroach/pkg/sql/types"
 	"github.com/cockroachdb/cockroach/pkg/util/ctxgroup"
+	"github.com/cockroachdb/cockroach/pkg/util/hlc"
 	"github.com/cockroachdb/cockroach/pkg/util/protoutil"
 	"github.com/cockroachdb/cockroach/pkg/util/syncutil"
 	"github.com/cockroachdb/cockroach/pkg/util/tracing"
@@ -321,9 +322,10 @@ func distImport(
 			return err
 		}
 
+		writeTS := &hlc.Timestamp{WallTime: walltime}
 		merged, err := bulkmerge.Merge(ctx, execCtx, inputSSTs, spans, func(instanceID base.SQLInstanceID) string {
 			return fmt.Sprintf("nodelocal://%d/job/%d/merge/", instanceID, job.ID())
-		})
+		}, 0 /* iteration */, 1 /* maxIterations */, writeTS)
 		if err != nil {
 			return err
 		}
